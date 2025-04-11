@@ -87,49 +87,51 @@ def inspect_dataset(dataset):
 
     return spectrogram.shape[1:]
 
+
 def visualize_dataset(dataset, class_names, num_examples=10):
     """
     Visualize examples from a prepared dataset of spectrograms
-    
+
     Args:
         dataset: A TensorFlow dataset containing (spectrogram, label) pairs
         class_names: List of target class names
         num_examples: Number of examples to display
     """
     plt.figure(figsize=(12, 10))
-    
+
     # Get a batch of examples
     for i, (spectrograms, labels) in enumerate(dataset.take(1)):
         # Only take up to num_examples
         spectrograms = spectrograms[:num_examples]
         labels = labels[:num_examples]
-        
+
         # Determine grid size
         grid_size = int(np.ceil(np.sqrt(num_examples)))
-        
+
         for j in range(min(num_examples, len(spectrograms))):
             # Get spectrogram and label
             spectrogram = spectrograms[j].numpy()
             label = labels[j].numpy()
-            
+
             # Get class name
             class_idx = np.argmax(label)
             class_name = class_names[class_idx]
-            
+
             # Plot spectrogram
             plt.subplot(grid_size, grid_size, j + 1)
-            
+
             # Remove the channel dimension for plotting
             spectrogram = np.squeeze(spectrogram)
-            
+
             # Display as an image
-            plt.imshow(spectrogram, aspect='auto', origin='lower', cmap='viridis')
-            plt.title(f'Class: {class_name}')
+            plt.imshow(spectrogram, aspect="auto", origin="lower", cmap="viridis")
+            plt.title(f"Class: {class_name}")
             plt.colorbar()
-            
+
     plt.tight_layout()
     plt.show()
-    
+
+
 # You can also visualize a single example in more detail
 def visualize_single_example(dataset, class_names):
     """Visualize a single example in detail"""
@@ -137,25 +139,35 @@ def visualize_single_example(dataset, class_names):
         # Get the first example
         spectrogram = spectrograms[0].numpy()
         label = labels[0].numpy()
-        
+
         # Get class name
         class_idx = np.argmax(label)
         class_name = class_names[class_idx]
-        
+
         # Create figure with two subplots
         fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-        
+
         # Remove the channel dimension for plotting
         spectrogram = np.squeeze(spectrogram)
-        
+
         # Display spectrogram
-        img = ax.imshow(spectrogram, aspect='auto', origin='lower', cmap='viridis')
-        ax.set_title(f'Mel Spectrogram - Class: {class_name}')
-        ax.set_ylabel('Mel Frequency Bin')
-        ax.set_xlabel('Time Frame')
-        
+        img = ax.imshow(spectrogram, aspect="auto", origin="lower", cmap="viridis")
+        ax.set_title(f"Mel Spectrogram - Class: {class_name}")
+        ax.set_ylabel("Mel Frequency Bin")
+        ax.set_xlabel("Time Frame")
+
         plt.colorbar(img, ax=ax)
         plt.tight_layout()
         plt.show()
-        
+
         break
+
+
+def filter_dataset_classes(dataset, class_names, classes_to_keep):
+    classes_indices = [class_names.index(c) for c in classes_to_keep]
+    labels_to_keep = tf.constant(classes_indices, dtype=tf.int64)
+    new_class_names = ["down", "left", "right", "up", "_silence_", "_unknown_"]
+
+    return dataset.filter(
+        lambda audio, label: tf.reduce_any(tf.math.equal(labels_to_keep, label))
+    )
