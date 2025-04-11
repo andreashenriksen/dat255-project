@@ -19,22 +19,39 @@ def check_gpu():
 
 def load_speech_commands():
     """
-    Loads the google speech commands, and saves them into 3 different datasets for 
+    Loads the google speech commands, and saves them into 3 different datasets for
     training, validation and testing.
-        
+
     Returns:
         train_ds, val_ds, test_ds
     """
     logging.info("Loading speech_commands dataset...")
-    train_ds = tfds.load("speech_commands", split="train", shuffle_files=True)
-    val_ds = tfds.load("speech_commands", split="validation", shuffle_files=True)
-    test_ds = tfds.load("speech_commands", split="test", shuffle_files=True)
+    train_ds, train_info = tfds.load(
+        "speech_commands",
+        split="train",
+        shuffle_files=True,
+        as_supervised=True,
+        with_info=True,
+    )
+    val_ds, val_info = tfds.load(
+        "speech_commands",
+        split="validation",
+        shuffle_files=True,
+        as_supervised=True,
+        with_info=True,
+    )
+    test_ds, test_info = tfds.load(
+        "speech_commands",
+        split="test",
+        shuffle_files=True,
+        as_supervised=True,
+        with_info=True,
+    )
     logging.info("Finished loading dataset.")
-    return train_ds, val_ds, test_ds
+    return train_ds, val_ds, test_ds, train_info, val_info, test_info
 
-def get_dataset_classes(dataset):
-    builder = tfds.builder('speech_commands')
-    class_names = builder.info.features['label'].names
-    labels = [example['label'].numpy() for example in dataset]
 
+def get_dataset_classes(dataset, dataset_info):
+    class_names = dataset_info.features["label"].names
+    labels = [example[1] for example in dataset]
     return class_names, labels
