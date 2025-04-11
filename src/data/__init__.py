@@ -6,7 +6,7 @@ from .preprocessing import (
     prepare_datasets,
     inspect_dataset,
     visualize_dataset,
-    visualize_single_example
+    visualize_single_example,
 )
 
 __all__ = [
